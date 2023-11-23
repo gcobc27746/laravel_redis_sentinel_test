@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  redis-master:
+    image: 'bitnami/redis:latest'
+    ports:
+      - target: 6379
+        published: 6379
+        protocol: tcp
+        mode: host
+    environment:
+      - REDIS_REPLICATION_MODE=master
+      - REDIS_REPLICA_IP=${REDIS_MASTER_IP}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/bitnami/redis/data
+    deploy:
+      placement:
+        constraints:
+          - node.labels.redis == true
+          - node.labels.redis-cluster == master
+
+  redis-slave-1:
+    image: 'bitnami/redis:latest'
+    ports:
+      - target: 6379
+        published: 6379
+        protocol: tcp
+        mode: host
+    depends_on:
+      - redis-master
+    environment:
+      - REDIS_REPLICATION_MODE=slave
+      - REDIS_REPLICA_IP=${REDIS_CLUSTER_IP_1}
+      - REDIS_MASTER_HOST=${REDIS_MASTER_IP}
+      - REDIS_MASTER_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/bitnami/redis/data
+    deploy:
+      placement:
+        constraints:
+          - node.labels.redis == true
+          - node.labels.redis-cluster == slave_1
+
+  redis-slave-2:
+    image: 'bitnami/redis:latest'
+    ports:
+      - target: 6379
+        published: 6379
+        protocol: tcp
+        mode: host
+    depends_on:
+      - redis-master
+    environment:
+      - REDIS_REPLICATION_MODE=slave
+      - REDIS_REPLICA_IP=${REDIS_CLUSTER_IP_2}
+      - REDIS_MASTER_HOST=${REDIS_MASTER_IP}
+      - REDIS_MASTER_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/bitnami/redis/data
+    deploy:
+      placement:
+        constraints:
+          - node.labels.redis == true
+          - node.labels.redis-cluster == slave_2
+
+  redis-sentinel:
+    image: 'bitnami/redis-sentinel:latest'
+    ports:
+      - target: 26379
+        published: 26379
+        protocol: tcp
+        mode: host
+    depends_on:
+      - redis-master
+    environment:
+      - REDIS_MASTER_HOST=${REDIS_MASTER_IP}
+      - REDIS_MASTER_PASSWORD=${REDIS_PASSWORD}
+    deploy:
+      replicas: 3
+      placement:
+        max_replicas_per_node: 1
+        constraints:
+          - node.labels.redis == true
+
+volumes:
+  redis-data:
