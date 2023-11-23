@@ -164,3 +164,11 @@ docker stop c01306eccb34
 ## 說明
 Sentinel 認 REDIS_MASTER_HOST 的時候 用 外部IP去認，否則會讓別的 container 找不到
 ![img.png](image/img_2.png)
+
+
+## Reference
+  * [Redis sentinel 簡介與部署](https://www.tpisoftware.com/tpu/articleDetails/2029)
+  * [bitnami/redis](https://hub.docker.com/r/bitnami/redis/)
+  * [Added ability to use Redis Sentinel configuration](https://github.com/laravel/framework/pull/18850#issuecomment-1213252909)
+  * [Laravel 使用 Redis](https://vocus.cc/article/625ba2bdfd89780001a72207)
+  * [bitnami/laravel](https://hub.docker.com/r/bitnami/laravel)
